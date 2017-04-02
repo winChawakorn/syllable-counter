@@ -86,13 +86,13 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		final String DICT_URL = "http://se.cpe.ku.ac.th/dictionary.txt";
-		setInput(DICT_URL);
-		// setInput("dictionary.txt");
+		Stopwatch stopwatch = new Stopwatch();
+		stopwatch.start();
+		// setInput(DICT_URL);
+		setInput("dictionary.txt");
 		List<String> words = readWords();
 		OOSyllableCounter wordCounter = new OOSyllableCounter();
 		int count = 0;
-		Stopwatch stopwatch = new Stopwatch();
-		stopwatch.start();
 		for (String word : words) {
 			count += wordCounter.countSyllables(word);
 		}
