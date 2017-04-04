@@ -5,7 +5,7 @@ package OOSyllableCounter;
  * Machine.
  * 
  * @author Chawakorn Suphepre
- * @version 2017.04.02
+ * @version 2017.04.04
  */
 public class OOSyllableCounter {
 	private final State START = new StartState();
@@ -14,10 +14,10 @@ public class OOSyllableCounter {
 	private final State CONSONANT = new ConsonantState();
 	private final State HYPHEN = new HyphenState();
 	private final State NONWORD = new NonWordState();
-	private State state;
+	private State state = START;
 	private char c = ' ';
 	private String word;
-	private int index;
+	private int currentSyllable = 0;
 	private int syllablesCount = 0;
 
 	/**
@@ -39,21 +39,22 @@ public class OOSyllableCounter {
 	 */
 	public int countSyllables(String word) {
 		if (word != null) {
-			setState(START);
 			syllablesCount = 0;
-			this.word = word;
-			for (int i = 0; i < word.length(); i++) {
-				c = word.charAt(i);
-				if (c == '\'')
-					continue;
-				this.index = i;
-				state.handleChar(c);
-				state.enterState();
+			if (word.length() == 0) {
+				setState(START);
+				currentSyllable = 0;
+				return 0;
 			}
-			return syllablesCount;
-		} else {
-			return 0;
+			c = word.charAt(0);
+			this.word = word;
+			if (c == '\'')
+				countSyllables(word.substring(1));
+			state.handleChar(c);
+			state.enterState();
+			currentSyllable += syllablesCount;
+			return syllablesCount + countSyllables(word.substring(1));
 		}
+		return 0;
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class OOSyllableCounter {
 		@Override
 		public void handleChar(char c) {
 			if (isLetter(c)) {
-				if (isVowel(c)) {
+				if (isVowelOrY(c)) {
 					setState(SINGLE_VOWEL);
 				} else {
 					setState(CONSONANT);
@@ -116,12 +117,9 @@ public class OOSyllableCounter {
 		 * have.
 		 */
 		public void enterState() {
-			if (!(index == word.length() - 1 && (c == 'e' || c == 'E') && syllablesCount != 0)) {
+			if (!(word.length() == 1 && (c == 'e' || c == 'E') && currentSyllable != 0))
 				syllablesCount++;
-			}
-
 		}
-
 	}
 
 	/**
