@@ -18,7 +18,7 @@ import stopwatch.Stopwatch;
  * count.
  * 
  * @author Chawakorn Suphepre
- * @version 2017.04.02
+ * @version 2017.04.04
  */
 public class Main {
 	private static InputStream in = null;
@@ -92,15 +92,20 @@ public class Main {
 		setInput("dictionary.txt");
 		List<String> words = readWords();
 		OOSyllableCounter wordCounter = new OOSyllableCounter();
-		int count = 0;
+		int countSyllable = 0;
+		int countWord = 0;
 		for (String word : words) {
-			count += wordCounter.countSyllables(word);
+			int currentCount = wordCounter.countSyllables(word);
+			countSyllable += currentCount;
+			if (currentCount > 0)
+				countWord++;
+
 		}
 		stopwatch.stop();
 		System.out
 				.println("Reading word from http://se.cpe.ku.ac.th/dictionary.txt");
-		System.out.println("Counted " + count + " syllables in " + words.size()
-				+ " words");
+		System.out.println("Counted " + countSyllable + " syllables in "
+				+ countWord + " words");
 		System.out.printf("Elapsed time: %.3f sec", stopwatch.getElapsed());
 	}
 }
