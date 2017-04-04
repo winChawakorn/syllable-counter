@@ -9,9 +9,10 @@ package SimpleSyllableCounter;
  */
 public class SimpleSyllableCounter {
 	/* Current state */
-	private State state;
+	private State state = State.START;
 	/* Current character in a String */
 	private char c = ' ';
+	private int totalSyllable;
 
 	/**
 	 * Count the syllables of a string.
@@ -23,83 +24,84 @@ public class SimpleSyllableCounter {
 	public int countSyllables(String word) {
 		if (word != null) {
 			int syllables = 0;
-			state = State.START;
-			for (int i = 0; i < word.length(); i++) {
-				c = word.charAt(i);
-				if (c == '\'')
-					continue;
-				switch (state) {
-				case START:
-					if (isLetter(c)) {
-						if (isVowel(c)) {
-							state = State.SINGLE_VOWEL;
-						} else {
-							state = State.CONSONANT;
-						}
-					} else if (isHyphen(c)) {
-						state = State.NONWORD;
-					}
-					break;
-				case CONSONANT:
+			if (word.length() == 0) {
+				state = State.START;
+				totalSyllable = 0;
+				return 0;
+			}
+			c = word.charAt(0);
+			if (c == '\'')
+				countSyllables(word.substring(1));
+			switch (state) {
+			case START:
+				if (isLetter(c)) {
 					if (isVowelOrY(c)) {
 						state = State.SINGLE_VOWEL;
-					} else if (isLetter(c)) {
-						break;
-					} else if (isHyphen(c)) {
+					} else {
+						state = State.CONSONANT;
+					}
+				} else if (isHyphen(c)) {
+					state = State.NONWORD;
+				}
+				break;
+			case CONSONANT:
+				if (isVowelOrY(c)) {
+					state = State.SINGLE_VOWEL;
+				} else if (isLetter(c)) {
+					break;
+				} else if (isHyphen(c)) {
+					state = State.HYPHEN;
+				} else {
+					state = State.NONWORD;
+				}
+				break;
+			case MULTI_VOWEL:
+				if (isLetter(c)) {
+					if (!isVowel(c)) {
+						state = State.CONSONANT;
+					}
+				} else {
+					if (isHyphen(c)) {
 						state = State.HYPHEN;
 					} else {
 						state = State.NONWORD;
 					}
-					break;
-				case MULTI_VOWEL:
-					if (isLetter(c)) {
-						if (!isVowel(c)) {
-							state = State.CONSONANT;
-						}
+				}
+				break;
+			case HYPHEN:
+				if (isLetter(c)) {
+					if (isVowel(c)) {
+						state = State.SINGLE_VOWEL;
 					} else {
-						if (isHyphen(c)) {
-							state = State.HYPHEN;
-						} else {
-							state = State.NONWORD;
-						}
+						state = State.CONSONANT;
 					}
-					break;
-				case HYPHEN:
-					if (isLetter(c)) {
-						if (isVowel(c)) {
-							state = State.SINGLE_VOWEL;
-						} else {
-							state = State.CONSONANT;
-						}
+				} else {
+					state = State.NONWORD;
+				}
+				break;
+			case SINGLE_VOWEL:
+				if (isLetter(c)) {
+					if (isVowel(c)) {
+						state = State.MULTI_VOWEL;
+					} else {
+						state = State.CONSONANT;
+					}
+				} else {
+					if (isHyphen(c)) {
+						state = State.HYPHEN;
 					} else {
 						state = State.NONWORD;
 					}
-					break;
-				case SINGLE_VOWEL:
-					if (isLetter(c)) {
-						if (isVowel(c)) {
-							state = State.MULTI_VOWEL;
-						} else {
-							state = State.CONSONANT;
-						}
-					} else {
-						if (isHyphen(c)) {
-							state = State.HYPHEN;
-						} else {
-							state = State.NONWORD;
-						}
-					}
-					break;
-				case NONWORD:
-					syllables = 0;
-					break;
 				}
-				if (!(i == word.length() - 1 && (c == 'e' || c == 'E') && syllables != 0)
-						&& state == State.SINGLE_VOWEL) {
-					syllables++;
-				}
+				break;
+			case NONWORD:
+				break;
 			}
-			return syllables;
+			if (!(word.length() == 1 && (c == 'e' || c == 'E') && totalSyllable != 0)
+					&& state == State.SINGLE_VOWEL)
+				syllables++;
+			totalSyllable += syllables;
+			return syllables + countSyllables(word.substring(1));
 		} else {
 			return 0;
 		}
