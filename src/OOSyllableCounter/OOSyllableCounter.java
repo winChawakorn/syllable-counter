@@ -5,7 +5,7 @@ package OOSyllableCounter;
  * Machine.
  * 
  * @author Chawakorn Suphepre
- * @version 2017.04.04
+ * @version 2017.04.17
  */
 public class OOSyllableCounter {
 	private final State START = new StartState();
@@ -52,6 +52,10 @@ public class OOSyllableCounter {
 			state.handleChar(c);
 			state.enterState();
 			currentSyllable += syllablesCount;
+			if (state == NONWORD) {
+				setState(START);
+				return currentSyllable * (-1);
+			}
 			return syllablesCount + countSyllables(word.substring(1));
 		}
 		return 0;
